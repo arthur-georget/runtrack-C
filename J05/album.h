@@ -1,6 +1,8 @@
 #include "stdbool.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include <unistd.h>
+#include <fcntl.h>
 
 typedef struct album_item{
     char *artist;
@@ -8,6 +10,8 @@ typedef struct album_item{
     int year;
     struct album_item *next;
 } AlbumItem;
+
+AlbumItem** parse_file(char* filePath);
 
 signed my_strcmp(char *s1, char *s2);
 

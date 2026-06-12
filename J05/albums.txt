@@ -1,0 +1,8 @@
+Metallica,Master of Puppets, 1986
+Metallica","...And Justice for All", 1988
+Metallica","Metallica", 1991
+Metallica","Ride The Lightning", 1984
+ACDC","T.N.T", 1975
+Black Sabbath","Black Sabbath", 1975
+Megadeth","Rust In Peace", 1990
+Motörhead","Overkill", 1979

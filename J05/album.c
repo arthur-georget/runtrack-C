@@ -1,5 +1,106 @@
 #include "album.h"
 
+char *clean_alloc_copy(char *src, int len) {
+    int start = 0;
+    int end = len;
+    
+    while (start < end && (src[start] == ' ' || src[start] == '"')) {
+        start++;
+    }
+    while (end > start && (src[end - 1] == ' ' || src[end - 1] == '"')) {
+        end--;
+    }
+    
+    char *dest = malloc(sizeof(char) * (end - start + 1));
+    if (!dest) return 0;
+    
+    int i = 0;
+    while (start < end) {
+        dest[i++] = src[start++];
+    }
+    dest[i] = '\0';
+    return dest;
+}
+
+int parse_int(char *src, int len) {
+    int num = 0;
+    int i = 0;
+    while (i < len && src[i] == ' ') {
+        i++;
+    }
+    while (i < len && src[i] >= '0' && src[i] <= '9') {
+        num = num * 10 + (src[i] - '0');
+        i++;
+    }
+    return num;
+}
+
+AlbumItem** parse_file(char* filePath){
+    printf("%s\n", filePath);
+
+    int openedFile = open(filePath, O_RDONLY);
+    if (openedFile < 0) {
+        printf("File not found.");
+        return 0;
+    }
+
+    AlbumItem *head = 0;
+    AlbumItem *tail = 0;
+    
+    char buffer[1024];
+    int buffer_index = 0;
+    char c;
+    
+    while (read(openedFile, &c, 1) > 0) {
+        if (c != '\n' && buffer_index < 1023) {
+            buffer[buffer_index++] = c;
+        } else {
+            if (buffer_index == 0) continue;
+            
+            int comma1 = -1;
+            int comma2 = -1;
+            
+            for (int i = 0; i < buffer_index; i++) {
+                if (buffer[i] == ',') {
+                    if (comma1 == -1) {
+                        comma1 = i;
+                    } else if (comma2 == -1) {
+                        comma2 = i;
+                        break;
+                    }
+                }
+            }
+            
+            if (comma1 != -1 && comma2 != -1) {
+                AlbumItem *new_node = malloc(sizeof(AlbumItem));
+                if (!new_node) break;
+                
+                new_node->artist = clean_alloc_copy(buffer, comma1);
+                new_node->title = clean_alloc_copy(buffer + comma1 + 1, comma2 - comma1 - 1);
+                new_node->year = parse_int(buffer + comma2 + 1, buffer_index - comma2 - 1);
+                new_node->next = 0;
+                
+                if (head == 0) {
+                    head = new_node;
+                    tail = new_node;
+                } else {
+                    tail->next = new_node;
+                    tail = new_node;
+                }
+            }
+            buffer_index = 0;
+        }
+    }
+    
+    close(openedFile);
+    
+    AlbumItem **result = malloc(sizeof(AlbumItem*));
+    if (!result) return 0;
+    *result = head;
+    
+    return result;
+}
+
 AlbumItem* create_album_item(char* artist, char* title, int year){
     AlbumItem* newAlbum = malloc(sizeof(AlbumItem));
     newAlbum->artist = artist;
